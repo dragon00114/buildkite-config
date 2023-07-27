@@ -1,0 +1,33 @@
+# This file is never read -- it's just a copy of the pipeline's
+# configuration in the Buildkite UI.
+
+# This config is intended for running the rails/buildkite-config CI.
+
+steps:
+  - block: "Review Build Script"
+    prompt: |
+      Our CI scripts run outside the docker containers, which are a necessary security layer.
+
+      Approving a build here is equivalent to copy & pasting it into a production ssh window.
+
+      Prefer a second opinion for any nontrivial change, especially outside `pipeline-generate`.
+
+      - @matthewd
+  - trigger: "rails-ci"
+    label: ":pipeline: Build Rails main with new config"
+    build:
+      message: "[${BUILDKITE_BRANCH}] ${BUILDKITE_MESSAGE}"
+      branch: "main"
+      env:
+        CONFIG_REPO: "${BUILDKITE_PULL_REQUEST_REPO}"
+        CONFIG_BRANCH: "${BUILDKITE_BRANCH}"
+        BUILDKITE_CONFIG_TRIGGER: true # This variable can be used downstream to avoid things like "if branch==main do Y"
+  - trigger: "rails-ci"
+    label: ":pipeline: Build Rails 6-1-stable with new config"
+    build:
+      message: "[${BUILDKITE_BRANCH} / 6-1-stable] ${BUILDKITE_MESSAGE}"
+      branch: "6-1-stable"
+      env:
+        CONFIG_REPO: "${BUILDKITE_PULL_REQUEST_REPO}"
+        CONFIG_BRANCH: "${BUILDKITE_BRANCH}"
+        BUILDKITE_CONFIG_TRIGGER: true # This variable can be used downstream to avoid things like "if branch==main do Y"
